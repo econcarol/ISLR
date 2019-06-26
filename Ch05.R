@@ -175,15 +175,15 @@ library(MASS)
 data(Boston)
 
 # (a)
-mu.hat = mean(Boston$medv) # 22.53
+mu.hat = mean(Boston$medv) #22.53
 
 # (b)
-mu.hat.se = sd(Boston$medv)/sqrt(nrow(Boston)) # 0.41
+mu.hat.se = sd(Boston$medv)/sqrt(nrow(Boston)) #0.41
 
 # (c)
 set.seed(1)
 boot.fn   = function(var, i) return(mean(var[i]))
-boot.stat = boot(Boston$medv, boot.fn, 50) # 0.39, close to (b)
+boot.stat = boot(Boston$medv, boot.fn, 50) #0.39, close to (b)
 boot.stat
 
 # (d)
@@ -192,17 +192,17 @@ print(paste('upperbd:', boot.stat$t0 + 2*sd(boot.stat$t)))
 t.test(Boston$medv)
 
 # (e)
-mu.med.hat = median(Boston$medv) # 21.2
+mu.med.hat = median(Boston$medv) #21.2
 
 # (f)
 set.seed(1)
 boot.fn   = function(var, i) return(median(var[i]))
-boot(Boston$medv, boot.fn, 50) # 0.39
+boot(Boston$medv, boot.fn, 50) #0.39
 
 # (g)
-mu.0.1.hat = quantile(Boston$medv, 0.1) # 12.8
+mu.0.1.hat = quantile(Boston$medv, 0.1) #12.8
 
 # (h)
 set.seed(1)
 boot.fn   = function(var, i) return(quantile(var[i], 0.1))
-boot(Boston$medv, boot.fn, 50) # 0.50
+boot(Boston$medv, boot.fn, 50) #0.50
