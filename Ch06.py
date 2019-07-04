@@ -624,7 +624,6 @@ for k in range(1, 11):
     cv_xtrain = x[train][folds != k-1] 
     
     oldxs   = []
-    mse     = []
     remainx = cv_xtrain
     
     for i in range(1, len(x.columns)+1):       
