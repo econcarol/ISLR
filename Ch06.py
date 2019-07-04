@@ -624,47 +624,44 @@ for k in range(1, 11):
     cv_xtrain = x[train][folds != k-1] 
     
     oldxs   = []
+    mse     = []
     remainx = cv_xtrain
     
     for i in range(1, len(x.columns)+1):       
         mse      = []
         xcombo   = []
-        best_mse = np.inf
+        best_ssr = np.inf
 
         for combo in itertools.combinations(remainx.columns, 1):
             tempx1 = sm.add_constant(cv_xtrain[oldxs + list(combo)])
             lm     = sm.OLS(cv_ytrain, tempx1).fit()
             
-            tempx2   = sm.add_constant(cv_xtest[tempx1.columns[1:]])
-            test_mse = mean_squared_error(cv_ytest, lm.predict(tempx2))           
-            mse.append(test_mse)
-            xcombo.append(combo)
+            if lm.ssr < best_ssr:
+                addx     = combo[0]
+                best_ssr = lm.ssr
+                tempx2   = sm.add_constant(cv_xtest[tempx1.columns[1:]])
+                test_mse = mean_squared_error(cv_ytest, lm.predict(tempx2))  
             
-        if min(mse) < best_mse:
-            addx = xcombo[mse.index(min(mse))][0]
-            # a list includes all the x's that have been chosen
-            # this updates the list, so later we must make a copy for recording
-            oldxs.append(addx)
-            # remove selected x's from the dataset
-            remainx = cv_xtrain.drop(labels=list(oldxs), axis=1)
-            # record info 
-            best_mse = min(mse)
-            best_xi  = oldxs.copy()
-            
-        cv_xi[k][i]  = best_xi
-        cv_err[k][i] = best_mse
+        # a list includes all the x's that have been chosen
+        # this updates the list, so later we must make a copy for recording
+        oldxs.append(addx)
+        # remove selected x's from the dataset
+        remainx = cv_xtrain.drop(labels=list(oldxs), axis=1)       
+        # record info
+        cv_xi[k][i]  = oldxs.copy()
+        cv_err[k][i] = test_mse
         
 # best model by # of features
 cv_err_mean = cv_err.apply(np.mean, axis=1)
 plt.plot(cv_err_mean)
 plt.xlabel('# of features')
 plt.ylabel('CV MSE')
-plt.scatter(cv_err_mean.argmin(), cv_err_mean.min(), s=100, c='r') #7
+plt.scatter(cv_err_mean.argmin(), cv_err_mean.min(), s=100, c='r') #8
 
 # compute MSE using test data
-tempx  = sm.add_constant(x[test][cv_xi[cv_err.loc[cv_err_mean.argmin(),:].argmin()][cv_err_mean.argmin()]])
+tempx  = sm.add_constant(x[test][cv_xi[1][cv_err_mean.argmin()]])
 lm     = sm.OLS(y[test],tempx).fit()
-lm_err = mean_squared_error(y[test], lm.predict(tempx)) #30.39
+lm_err = mean_squared_error(y[test], lm.predict(tempx)) #30.45
 
 # LASSO
 lassocv    = LassoCV(cv=10, normalize=True).fit(x[train], y[train]) # 10-fold CV
